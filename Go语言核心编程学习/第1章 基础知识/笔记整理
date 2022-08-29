@@ -1,0 +1,150 @@
+1.3Go词法单元
+1.3.1~3 token
+  token是构成源程序的基本不可再分割的单元
+  token分类：
+    -关键字 只有25个 func package import等等
+    -类型标识符 int string bool等
+
+    -内置函数 make new 等
+    -常量标识符 true false iota nil
+
+    -操作符 + - & , : ; . ... <-等
+    -纯粹的分隔符4个 空格 制表符 回车 换行
+
+    -字面常量，简称字面量 一般用裸字符序列表示不同类型的值，
+      Go中常用在两个地方（1）常量和变量的初始化（2）表达式或者作为函数调用实参
+      Go不支持用户自定义字面量
+      例子：整形字面量 42 0600 0xBadFace 1721213545487
+            浮点型字面量 0. 72.40 072.40 2.71828 1.e+0 6.67428e-11 1E6 .25 .12544E+5
+            复数字面量
+            字符型字面量 'a' '本' '\t' '\377' '\x07'
+            字符串字面量 "\n"   "\""相当于 "  "hello, world！\n" "中国人"
+
+1.4变量和常量
+    变量：一个名称，来绑定一块内存地址，指向的内存可以被修改
+    常量：指向的内存不可以被修改
+1.4.1变量
+    1.显示声明
+        var varName dataType [ = value ]
+        例如：var a int = 1
+    2.短类型声明(常用)
+        varName := value
+        例如：b := "hello"
+
+1.4.2常量
+    可以是布尔型、字符串型和数值型
+
+    //类似枚举的iota
+    const (
+        c0 = iota //c0 == 0
+        c1
+        c2
+    )
+
+1.5基本数据类型
+1.5.1 布尔类型
+    bool 只有两个值 true false
+    例子 var ok bool   //默认为false
+        ok = true
+        或者 
+        ok := true
+    
+    for ;true; {  //等价于c语言的while(1)
+
+    }
+1.5.2整型
+    var a int = 1
+    var b int32 = 2
+    b = a //error，因为是两个类型，需要强制类型转换
+
+    var a int = (1+2)*3
+    var b int = 1000>>2 //位运算符
+
+1.5.3浮点型
+    float32和float64
+    var b := 10.0 //默认被推断成float64
+    浮点数不应该使用 == 或!=比较，高精度需求应使用math标注库
+1.5.4复数
+省略
+
+1.5.5字符串
+        var a = "hello, world"
+    (1)字符串是常量，可通过类似数组索引方式访问其字节单元，但不能修改某个字节值
+        var a = "hello, world"
+        b := a[0]
+        a[1] = 'a' //error
+
+    (2)字符串转换成切面[]byte(s)要慎用，尤其数据量大时，每次转换都要复制内容
+        a:="hello, world"
+        b:=[]byte(a)
+
+    (3)结尾不包含NULL字符，和C/C++不一样
+    (4)底层实现 二元数据结构 略
+    (5)基于字符串创建的切片，仍是字符串string，并非slice
+        a:="hello, world"
+        b := a[0:4]
+        c := a[1:]
+        c := a[:4]
+    (6)字符串转换成切片
+        a :="hello, world"
+        b :=[]byte(a)    //字节数组，byte是uint的别名，
+        c :=[]rune(a)    //Unicode编码的rune数组，rune是Go内部int32类型的别名，占4个字节
+    
+    (7)字符串运算
+        a :="hello"
+        b :="world"
+
+        c := a + b  //字符串拼接
+        len(c)      //内置函数，返回字符串长度
+
+        d := "hello, 世界"
+
+        for i:=0; i<len(d);i++{ //遍历字节数组
+            fmt.Println(d[i])
+        }
+
+        for i,v :=range d{     //遍历rune数组
+            fmt.Println(i, v)
+        }
+
+1.6复合数据类型
+指针、数组、切片、字典(map)、通道、结构体和接口
+字面量格式如下：
+* pointerType    //指针 *后面跟其指向的类型
+[n] elementType  //数组 n为长度
+[] elementType   //切片
+map [keyType] valueType    //map
+chan valueType             //通道
+struct {                   //结构体
+    feildName feildType
+    feildName feildType
+    ...
+}
+interface {                //接口
+    method1(inputParams) (returnParams)
+    method2(inputParams) (returnParams)
+}
+
+1.6.1指针（指向内存的地址）
+    指针声明为*T,多级指针**T, 变量名前&可以获取变量的地址
+    (1)赋值语句，*T在等号左侧表明指针声明，*T在等号右侧表明取地址的值
+        var a = 11
+        p := &a     // *p和a的值都是11
+    (2)结构体指针
+        type User struct {
+            name string
+            age int
+        }
+        andes := User{
+            name: "andes",
+            age: 18,
+        }
+        p := &andes    //结构体指针
+        fmt.Println(p.name)   //访问元素仍然用 . 访问成员变量 （Go中没有->操作符）
+    (3)指针不能运算
+        p++  //不允许， 报non-numeric type *int错误
+    (4)函数允许返回局部变量的地址
+        func sum(a, b int) *int{
+            sum := a+b
+            return &sum    //允许，sum会分配在heap上
+        }
