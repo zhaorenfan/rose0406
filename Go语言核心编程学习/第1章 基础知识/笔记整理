@@ -148,3 +148,98 @@ interface {                //接口
             sum := a+b
             return &sum    //允许，sum会分配在heap上
         }
+
+1.6.2数组
+    var arr [2]int  //声明有两个整型的数组，默认都是0
+    array := [...]float64(7.0, 8.5, 9.1)   //初始化列表
+
+    数组初始化
+        a := [3]int{1, 2, 3}
+        a := [...]int{1, 2, 3}  //长度由列表数量确定
+        a := [3]int{1:1, 2:3}  //索引初始化，没有初始化的使用默认值
+        a := [...]int{1:1, 2:3} //长度由最后一个索引确定
+    
+    数组特点：
+        (1)长度初始化后就直接固定，不可再多加元素
+        (2)数组是值类型， 赋值和函数传参数都是 值拷贝
+        (3)长度是类型的一部分 [10]int 和 [20]int表示不同的类型
+        (4)可以根据数组创建切片
+    
+    数组相关操作
+        (1)元素访问
+            a := [...]int{1, 2, 3}
+            b :=a[0]
+            for i,v := range a{
+
+            }
+        (2)数组长度
+            a := [...]int{1, 2, 3}
+            alength := len(a)
+
+            for i:=0;i<alength;i++{
+
+            }
+
+1.6.3切片
+    slice可变长度的数组，是一种引用类型，维护三个元素--指向底层数组的指针、切片数量和底层数组的容量
+    (1)切片的创建
+    ·由数组创建
+        array[b:e]     第一个元素是array[b]，最后一个元素是array[e-1]
+    例子：
+        var array := [...]int{0, 1, 2, 3, 4, 5, 6}
+        s1 := array[0:4]
+        s2 := array[:4]
+        s3 := array[2:]
+        fmt.Printf("%v\n", s1)   // [0 1 2 3]
+        fmt.Printf("%v\n", s2)   // [0 1 2 3]
+        fmt.Printf("%v\n", s3)   // [2 3 4 5 6]
+    
+    ·通过内置函数make创建切片
+        默认为类型的零值,容量cap要大于长度len
+        //len=10, cap=10
+        a := make([]int 10)
+
+        //len=10, cap=15
+        b := make([]int 10, 15)
+        fmt.Printf("%v\n", a)   //[0 0 0 0 0 0 0 0 0 0]
+        fmt.Printf("%v\n", b)   //[0 0 0 0 0 0 0 0 0 0]
+
+        *注意：直接声明切片类型变量是没意义的
+        var a []int
+        fmt.Printf("%v\n", a)   //结果为 []
+    
+    (2)切片操作
+        ·内置函数len()返回切片长度
+        ·内置函数cap()返回切片底层数组容量
+        ·内置函数append()对切片追加元素
+        ·内置函数copy()用于复制一个切片
+    示例如下：
+        a := [...]int{0, 1, 2, 3, 4, 5, 6}
+        b := make([]int, 2, 4)    // [0 0]
+        c := a[0:3]
+
+        fmt.Println(len(b))      //2
+        fmt.Println(cap(b))      //4
+
+        b = append(b, 1)
+        fmt.Println(b)           //[0 0 1]
+        fmt.Println(len(b))      //3
+        fmt.Println(cap(b))      //4
+
+        b = append(b, c...)
+        fmt.Println(b)           //[0 0 1 0 1 2]
+        fmt.Println(len(b))      //6
+        fmt.Println(cap(b))      //8    底层数组自动扩展
+
+        d := make([]int, 2, 2)
+        copy(d, c)                //copy只会复制d和c中长度最小的
+        fmt.Println(d)            //[0 1]
+        fmt.Println(len(d))       //    2
+        fmt.Println(cap(d))       //    2
+    
+    (3)字符串和切片的相互转换。例如
+        str := "hello, 世界！"
+        a := []byte(str)
+        b := []rune(str)
+
+
