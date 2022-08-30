@@ -72,3 +72,271 @@
 		chpointer(&a)  //传指针，产生指针的副本，指向相同的地址
 		fmt.Println(a) //值发生改变
 	}
+
+2.1.4不定参数
+	param ...type
+	相当于切片，类型必须相同，必须是函数的最后一个参数
+	 func sun(arr ...int) (sum int) {
+		for _, v := range arr {
+			sum += v
+		}
+		return
+	 }
+	 
+	 //切片可以作为参数传递给不定参数，切片名后加...
+	 func main(){
+		slice := []int {1, 2, 3, 4}
+		array := [...]int{1, 2, 3, 4}
+		
+		//数组不可以作为实参传递给不定参数的函数
+		
+		sum(slice...)
+		
+	 }
+	 
+	 //形参作为不定参数的函数和形参为切片的函数类型不同
+	 func suma(arr ...int) (sum int){
+		for v:=range arr{
+			sum+=v
+		}
+		return
+	 }
+	 func sumb(arr []int) (sum int){
+		for v:=range arr{
+			sum+=v
+		}
+		return
+	 }
+	 
+	 //suma和sumb的类型并不一样
+	 fmt.Printf("%T\n", suma)   // func(...int) int
+	 fmt.Printf("%T\n", sumb)   // func([]int) int
+
+2.2函数签名和匿名函数
+
+2.2.1函数签名
+	函数类型又叫函数签名，就是函数定义首行去掉函数名、参数名和{
+		fmt.Printf("%T\n", funcName)
+	例子：   
+		package main
+
+		import "fmt"
+
+		func add(a, b int) int{
+			return a+b
+		}
+
+		func main(){
+			fmt.Printf("%T\n", add)  //func(int, int) int
+		}
+	
+	//两个函数类型相同的条件：拥有相同的形参列表和返回值列表，形参名可以不同
+	//下面两个函数签名相同
+		func add(a,b int) int { return a+b}
+		func sub(x int, y int) (c int) {c=x-y;return c}
+	
+	
+	//type自定义函数类型
+		package main
+
+		import "fmt"
+
+		func add(a, b int) int{
+			return a+b
+		}
+
+		func sub(a, b int) int{
+			return a-b
+		}
+
+		type Op func(int, int)int  //定义一个函数类型
+
+		func do(f Op, a, b int) int{  //定义一个函数，第一个参数是函数类型Op
+			return f(a, b)            //函数类型变量可以直接用来进行函数调用
+		}
+
+		func main(){
+			a := do(add, 1, 2)        //函数名可以当做相同类型形参，不需要强制类型转换
+			fmt.Println(a)     //3
+			s := do(sub, 1, 2)
+			fmt.Println(s)     //-1
+		}
+	
+	实际函数类型变量和函数名都可以当做指针变量，指向函数代码起始位置，是一种引用类型，未初始化默认为nil
+	
+	函数为Go语言“第一公民”，有名函数的函数名可作为常量，可直接用函数名调用函数，也可以直接
+	赋值给函数类型变量
+		package main
+
+		func sum(a, b int) int {
+			return a+b
+		}
+		func main(){
+			sum(3, 4)   //直接调用
+			f:=sum      //有名函数直接赋值给变量
+			f(1,2)
+		}
+
+2.2.2匿名函数
+	函数字面量
+	例子：
+	
+	package main
+
+	import "fmt"
+	//匿名函数被直接赋值函数变量
+	var sum = func(a, b int) int {
+		return a+b
+	}
+
+	//匿名函数作为参数
+	func doinput(f func(int, int)int, a, b int) int{
+		return f(a, b)
+	}
+
+	//匿名函数作为返回值
+	func wrap(op string) func(int, int) int{
+		switch op{
+			case "add":
+				return func(a, b int) int{
+					return a+b
+				}
+			case "sub":
+				return func(a, b int) int{
+					return a-b
+				}
+			default:
+				return nil
+		}
+	}
+
+	func main(){
+		//匿名函数直接被调用
+		defer func(){
+			if err:= recover(); err!=nil{
+				fmt.Println(err)
+			}
+		}()
+		
+		sum(1, 2)
+		
+		//匿名函数作为实参
+		doinput(func(x,y int) int{
+			return x+y
+		}, 1, 2)
+		
+		opFunc := wrap("add")
+		re := opFunc(2, 3)
+		
+		fmt.Printf("%d\n", re)
+	}
+	
+2.3 defer
+	可以注册多个延迟调用，先进后出的顺序在函数返回前被执行
+	常用于保证一些资源最终一定能够得到回收和释放
+	defer后面必须是函数或方法的调用
+	例1：
+		package main
+
+		import "fmt"
+
+		func main(){
+			//先进后出
+			defer func(){
+				fmt.Println("first")
+			}()
+			defer func(){
+				fmt.Println("second")
+			}()
+			fmt.Println("function body")
+		}
+		//结果如下
+		function body
+		second
+		first
+	例2：
+		//实参在注册时通过值拷贝传递进去
+		func f() int{
+			a:=0
+			defer func(i int){
+				fmt.Println("defer i=", i)
+			}(a)    //此时a=0，i接收也是0，值拷贝，后面a++不影响i的值
+			
+			a++
+			return a
+		}
+		
+		//defer打印结果
+		defer i=0
+	
+	例3：
+		//defer语句必须先注册后才能执行， 如果defer位于return之后，则defer因为没有注册，不会执行
+		package main
+
+		import "fmt"
+
+		func main(){
+			//先进后出
+			defer func(){
+				fmt.Println("first")
+			}()
+			a :=0
+			fmt.Println(a)
+			return 
+			defer func(){     //return后没能注册上，因此不会被执行
+				fmt.Println("second")
+			}()
+		}
+		结果：
+		0
+		first
+	
+	例4：
+		//主动调用os.Exit(int)退出进程时， defer将不再被执行（即使defer已经提前注册）
+		package main
+
+		import (
+			"fmt"
+			"os"
+		)
+
+		func main(){
+			//先进后出
+			defer func(){
+				fmt.Println("defer")
+			}()
+			fmt.Println("func body")
+			
+			os.Exit(1)
+		}
+		//结果
+		func body
+
+
+		Exited with error status 1
+		
+	例5：
+		//在一定程度上避免资源泄漏
+		func CopyFile(dst, src string) (w int64, err error){
+			src, err := os.Open(src)
+			if err != nil {
+				return
+			}
+			defer src.Close()
+			
+			dst, err := os.Create(dst)
+			if err!=nil {
+				return
+			}
+			defer dst.Close()
+			
+			w, err = io.Copy(dst, src)
+			
+			return
+		}
+		
+	
+	其他说明：
+		defer语句位置不当，有可能引发panic，一般defer语句放在错误检查语句之后
+		defer副作用，会推迟资源的释放，defer尽量不要放到循环语句里
+
