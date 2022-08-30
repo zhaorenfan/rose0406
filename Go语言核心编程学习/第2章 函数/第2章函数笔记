@@ -340,3 +340,142 @@
 		defer语句位置不当，有可能引发panic，一般defer语句放在错误检查语句之后
 		defer副作用，会推迟资源的释放，defer尽量不要放到循环语句里
 
+2.4闭包
+2.4.1概念
+	闭包 = 函数 + 引用环境
+	一般通过匿名函数中引用外部函数的局部变量或全局变量构成
+	
+	package main
+
+	import (
+		"fmt"
+	)
+
+	func fa(a int) func(i int) int{   
+		return func(i int) int{
+			fmt.Println(&a, a)
+			a = a+i
+			return a
+		}
+	}
+	
+	//上面个人理解的是 函数fa会返回闭包，当前闭包是一个匿名函数+加上一个局部变量a
+
+	func main(){
+		//函数fa本次通过传入参数1后返回闭包，被f引用
+		f:=fa(1)          //f引用的外部的闭包环境包括本次函数调用的形参a的值1
+		g:=fa(1)          //g引用的外部的闭包环境包括本次函数调用的形参a的值1
+		
+		//f和g不是一个，闭包环境中a的值并不是同一个，是两个函数调用产生的两个副本
+		
+		fmt.Println(f(1))
+		//多次调用f引用的是同一个副本a
+		fmt.Println(f(1))
+		
+		//g中a的值仍然是1
+		fmt.Println(g(1))
+		fmt.Println(g(1))
+		
+	}
+
+	//运行结果
+	0xc000016060 1
+	2
+	0xc000016060 2
+	3
+	0xc000016068 1
+	2
+	0xc000016068 2
+	3
+	
+	//f和g引用的是不同的a
+	//如果一个函数调用返回的闭包引用，则每次调用都会影响全局变量
+	
+	
+	//尽量不要用闭包引用全局变量，引用的例子如下：
+	package main
+
+	import "fmt"
+
+	var (
+		a = 0    //全局变量a
+	)
+
+	func fa() func(i int) int{
+		return func(i int) int {
+			fmt.Println(&a, a)
+			a = a+i
+			return a
+		}
+	}
+
+	func main(){
+		f:=fa()
+		g:=fa()
+		//此时f、g引用的闭包环境的a是一个值
+		fmt.Println(f(1))
+		fmt.Println(g(1))
+		fmt.Println(g(1))
+		fmt.Println(g(1))
+	}
+	
+	//结果
+	0x57aa58 0
+	1
+	0x57aa58 1
+	2
+	0x57aa58 2
+	3
+	0x57aa58 3
+	4
+
+
+	//同一个函数返回的多个闭包共享该函数的局部变量。例如
+	package main
+
+	import "fmt"
+
+
+
+	func fa(base int) (func(int) int, func(int) int){
+		fmt.Println(&base, base)
+		add := func(i int) int{
+			base += i
+			fmt.Println(&base, base)
+			return base
+		}
+
+		sub := func(i int) int{
+			base -= i
+			fmt.Println(&base, base)
+			return base
+		}
+		return add, sub
+	}
+
+	func main(){
+		f, g := fa(0)
+		s, k := fa(0)
+		
+		fmt.Println(f(1), g(2))
+		fmt.Println(s(1), k(2))
+	}
+	//结果
+	0xc000016060 0
+	0xc000016068 0
+	0xc000016060 1
+	0xc000016060 -1
+	1 -1
+	0xc000016068 1
+	0xc000016068 -1
+	1 -1
+	
+2.4.2闭包的价值
+	闭包最初的目的是减少全局变量，函数调用隐式传递共享变量
+	缺点，不够直接，不清晰
+	除非有用的地方，一般不使用闭包
+	
+	对象是附有行为的数据，而闭包是附有数据的行为
+	类在定义时已经显式集中定义行为，但是闭包中数据没有显式集中声明的地方
+	
+	闭包不是不可缺少
