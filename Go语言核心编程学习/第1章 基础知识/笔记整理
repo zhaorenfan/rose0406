@@ -242,4 +242,242 @@ interface {                //接口
         a := []byte(str)
         b := []rune(str)
 
+1.6.4 map
+	字典
+	map[K] T
+	键-值对
+	key-value
+	(1)map创建
+		·使用字面量创建
+			ma := map[string]int{"a": 1, "b": 2}
+			fmt.Println(ma["a"])
+			fmt.Println(ma["b"])
+		·使用内置的make函数创建
+			语法如下：
+			make(map[K]T)        //map的容量使用默认
+			make(map[K]T, len)   //map的容量使用给定值
+			
+			mp1 := make(map[int]string)     //map的容量使用默认
+			mp2 := make(map[int]string, 10) //map的容量是10
+			map1[1] = "tom"     //赋值
+			map2[1] = "pony"
+			fmt.Println(mp1[1])   //tom
+			fmt.Println(mp2[1])   //pony
+	(2) map支持的操作
+		·单个键值访问格式如下：
+			mapName[key] = value  //更新
+			var v = mapName[key]  //访问
+		·使用range遍历map，但是不保证顺序
+		·删除map某个键值,使用内置函数delete，格式为：
+			delete(mapName, key)
+		·内置函数len()返回map键值对的数量。
+			mp := make(map[int]string)
+			mp[1] = "tom"
+			mp[1] = "pony"
+			mp[2] = "jaky"
+			mp[3] = "andes"
+			
+			delete(mp, 3)
+			
+			fmt.Println(mp[1])
+			fmt.Println(len(mp))
+			
+			for k, v := range mp{
+				fmt.Println("key=", k, "value=", v)
+			}
+	注意：
+		·Go内置的map不是并发安全的，并发安全需要用标准包sync中的map
+		·不要直接修改map中value内某个元素的值（value为结构体，不能通过map直接修改成员变量）
+		 需要整体赋值
+		 例如：
+		 type User struct {  
+			name string
+			age int
+		 }
+		 ma := make(map[int]User)
+		 andes := User{
+			name: "andes",
+			age: 18,
+		 }
+		 
+		 ma[1] = andes
+		 //ma[1].age = 19   //ERROR， 不能通过map引用直接修改 
+		 andes.age = 19     //可以这么修改
+		 ma[1] = amdes      //整体替换回来
+		 fmt.Printf("%v\n", ma)
+	
+1.6.5 struct
+	结构体
+	第一：struct结构中的类型可以任意
+	第二：struct的存储空间连续，字段按照声明顺序存放（字段间有对其要求）
+	（1）struct字面量 (不常用)
+		struct {
+			FieldName FeildType
+			FieldName FeildType
+			FieldName FeildType
+		}
+	（2）自定义struct类型 （常用）
+		type TypeName struct {     //type为自定义类型的关键字，除了struct还用于其他子定义类型创建
+			FieldName FeildType
+			FieldName FeildType
+			FieldName FeildType
+		}
+	（3）struct类型变量的初始化
+		type Person struct {
+			Name string
+			Age int
+		}
+		type Student struct {
+			*Person
+			Age int
+		}
+		//按照类型声明顺序，逐个赋值
+		//不推荐这种初始化方式，一旦struct增加字段，整个初始化语句报错，修改不方便
+		a := Person("Tom", 21)
+		
+		//推荐下面初始化方法,没有指定字段默认为类型零值
+		a := &Persion{              //结构体指针，指向结构体的地址
+			Name: "TangTang",
+			Age: 18,
+		}
+		
+		s := Student {
+			Person: p,
+			Number: 110,
+		}
+
+1.7控制结构
+	程序执行本质上就是两种模式：顺序和跳转
+	
+1.7.1 if语句
+	·if后面不需要小括号
+	·{必须放行尾，和if或if else放在一行
+	·if后面可以带一个简单的初始化语句，以分号分割，该变量作用域是整个if语句块，包括分支
+	·没有（a>b?a:b）语句
+	·分支遇到return直接返回，遇到break跳到下方的if语句块
+	示例：
+		if x<=y {
+			return y
+		} else {
+			return x
+		}
+		
+		
+		if x:=f(); x<y {  //初始化语句中声明变量x
+			return x
+		} else if x>z {   //x在分支一样可以被访问
+			return z
+		} else {
+			return y
+		}
+		
+		err, file := os.Open("xxx")
+		if err!= nil{
+			return nil, err
+		}
+		defer file.Close()
+		//do something
+
+1.7.2 switch语句
+	·switch后面也可以带一个简单的初始化语句
+	·switch后面的表达式可选，没有则case子句为布尔表达式
+	·表达式不像C语言必须为整数，可以任意比较运算的
+	·fallthrough语句强制执行下一条case语句
+	·default可以放到任意位置
+	·switch和（.type）结合可以进行类型查询，再说
+	
+	switch i:= "y"; i {
+		case "y", "Y":
+			fmt.Println("yes")
+			fallthrough
+		case "n", "N":
+			fmt.Println("no")
+	}
+	
+	score := 85
+	grade := ' '
+	switch {
+		case score >= 90:
+			grade = 'A'
+		case score >= 80:
+			grade = 'B'
+		case score >= 70:
+			grade = 'C'
+		case score >= 60:
+			grade = 'D'
+		default:
+			grade = 'F'
+	}
+	
+	fmt.Println(grade)
+
+1.7.3 for语句
+	应用的三种场景
+	类似C的for循环
+		for init; condition; post {}
+	类似C的while循环
+		for condition {}
+	类似C的while(1)死循环
+		for {}
+	此外，对于数组、切片、字符串、map和通道的访问
+	
+		//访问map
+		for key, value := range map { }
+		for key := range map { }
+		
+		//访问数组
+		for index, value := range arry{}
+		for index := range arry{}
+		for _, value := range arry{}
+		
+		//访问切片，和数组一样
+		for index, value := range slice{}
+		for index := range slice{}
+		for _, value := range slice{}
+		
+		//访问通道
+		for value := range channel{}
+
+1.7.4标签和跳转
+	标签Label用于标识一个语句的位置，用于goto、break、continue语句的跳转
+	标签语法如下：
+		Label： Statement
+	(1)goto语句用于函数内部跳转、需要配合标签一起使用
+	
+	(2)break 用于函数内跳出for、switch、select语句
+	//break可以单独使用跳出最近循环或者和标签配合使用跳出标签所在循环
+	L1:
+		for i:=0;  ;i++{      //循环1
+			for j:=0; ; j++{    //循环2
+				if i>=5 {
+					//跳出L1所在循环 ，即循环1
+					break L1
+				}
+				if j>10 {
+					//默认仅跳出离break最近的内层循环 ，即循环2
+					break
+				}
+			}
+		}
+	
+	(3)continue，用于跳出for循环的本次迭代
+	L1:
+		for i:=0;  ;i++{      //循环1
+			for j:=0; ; j++{    //循环2
+				if i>=5 {
+					//跳到标签L1所在for循环（循环1） i++处继续执行
+					continue L1
+				}
+				if j>10 {
+					//默认仅跳到离continue最近的内层循环（循环2） j++处继续执行
+					continue
+				}
+			}
+		}
+		
+	(4)return和函数调用
+		return也能引发控制流程的跳转，用于函数和方法的退出。函数和方法的调用也能引发程序控制流的跳转。
+
+第一章完笔记完结
+用时1天
 
