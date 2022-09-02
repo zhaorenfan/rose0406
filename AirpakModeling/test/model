@@ -1,0 +1,144 @@
+#@ Airpak 3.0.16 model file
+
+object domain room.1
+    current_genus default
+    shape body_shape shape_none
+        setval 
+    end shape
+    current_stype none
+    creation_order 1
+    grid_priority 0
+end object
+
+object block block.1
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-2.950 0.000 0.000} point2 {2.950 12.270 2.650} diff {5.900 12.270 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.2
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-6.950 0.000 0.000} point2 {6.950 9.274 2.650} diff {13.900 9.274 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.3
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-8.502 0.000 0.000} point2 {8.502 5.370 2.650} diff {17.004 5.370 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.4
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-6.950 -4.630 0.000} point2 {0.000 0.000 2.650} diff {6.950 4.630 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.5
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-5.350 -3.530 0.000} point2 {5.350 0.000 2.650} diff {10.700 3.530 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.6
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {0.000 -4.630 0.000} point2 {7.050 0.000 2.650} diff {7.050 4.630 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.7
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {0.000 -6.630 0.000} point2 {5.350 0.000 2.650} diff {5.350 6.630 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.8
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-5.350 -6.630 0.000} point2 {0.000 0.000 2.650} diff {5.350 6.630 2.650} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.9
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-6.950 0.000 0.000} point2 {6.950 9.274 4.910} diff {13.900 9.274 4.910} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.10
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-4.250 0.000 0.000} point2 {4.250 8.074 4.910} diff {8.500 8.074 4.910} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.11
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {-6.950 -4.630 0.000} point2 {0.000 5.320 4.910} diff {6.950 9.950 4.910} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
+object block block.12
+    current_stype hexa
+    block_type fluid
+    shape body_shape shape_hexa
+        setval point1 {0.000 -4.630 0.000} point2 {6.950 5.320 4.910} diff {6.950 9.950 4.910} volume_flag {1} diff_flag {0} 
+    end shape
+    grid_priority 3
+    creation_order 4
+    current_genus default
+end object
+
