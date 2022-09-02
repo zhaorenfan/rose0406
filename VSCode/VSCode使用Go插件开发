@@ -1,0 +1,21 @@
+VSCode配置Go语言开发环境
+（1）下载与安装
+VS Code官方下载地址：https://code.visualstudio.com/Download
+安装VS Code
+（2）安装中文简体插件
+点击左侧菜单栏最后一项管理扩展，在搜索框中输入chinese ，选中结果列表第一项，点击install安装。
+安装完毕后右下角会提示重启VS Code，重启
+（3）安装Go开发扩展
+搜索Go Rich那一个 安装
+
+配置
+系统环境变量添加两个
+GO111MODULE=on
+GOPROXY=https://goproxy.io
+注：等号左侧是变量名，右侧变量值
+
+settings.json添加下面配置
+	"go.gopath": "D:\\goworks",                      Go的第三方的包路径，可任意
+    "go.goroot": "D:\\Program Files\\Go",            Go的安装路径，安装时就确定了
+
+cmd的路径查看执行 go env
