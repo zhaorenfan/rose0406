@@ -1,6 +1,6 @@
 /*
- * @Descripttion: 
- * @version: 
+ * @Descripttion:
+ * @version:
  * @Author: 招人烦
  * @Date: 2022-08-29 17:52:44
  * @LastEditors: 招人烦
@@ -9,47 +9,53 @@
 package main
 
 import (
-	"fmt"
 	"airpak"
+	"fmt"
 )
 
-
-
-
-
-
-func main(){
+func main() {
 	fmt.Printf("Hello, world. 你好， 世界！\n")
-	domain :=&airpak.Domain{
-		Name: "room.1",
-	}
-	block :=airpak.Block{
-		Name: "block.1",
-		BlockType: airpak.FLUID,
-		Point1: airpak.Point{X: -1., Y: 0., Z: 0.},
-		Point2: airpak.Point{X: 0., Y: 2., Z: 1.},
-	}
-	wall :=airpak.Wall{
-		Name: "wall.1",
-		Point1: airpak.Point{X: -1., Y: 0., Z: 1.},
-		Point2: airpak.Point{X: 0., Y: 2., Z: 1.},
-	}
-	open :=airpak.Opening{
-		Name: "open.1",
-	}
+	file := "block.txt"
+	data := &airpak.Data{}
+	airpak.Parse(data, file)
 
+	// domain := &airpak.Domain{
+	// 	Name: "room.1",
+	// }
+	// block := &airpak.Block{
+	// 	Name:      "block.1",
+	// 	BlockType: airpak.FLUID,
+	// 	Point1:    airpak.Point{X: -1., Y: 0., Z: 0.},
+	// 	Point2:    airpak.Point{X: 0., Y: 2., Z: 1.},
+	// }
+	// wall := &airpak.Wall{
+	// 	Name:   "wall.1",
+	// 	Point1: airpak.Point{X: -1., Y: 0., Z: 1.},
+	// 	Point2: airpak.Point{X: 0., Y: 2., Z: 1.},
+	// }
+	// open := &airpak.Opening{
+	// 	Name: "open.1",
+	// }
 
-	//Airpak对象的切片
-	Objects:=[] airpak.AirPaKObj{}
-	Objects = append(Objects, domain)
-	Objects = append(Objects, block)
-	Objects = append(Objects, wall)
-	Objects = append(Objects, open)
+	// //Airpak对象的切片
+	// Objects := []airpak.AirPaKObj{}
+	// Objects = append(Objects, domain)
+	// Objects = append(Objects, block)
+	// Objects = append(Objects, wall)
+	// Objects = append(Objects, open)
 
-	for _, obj := range Objects{
-		fmt.Printf("%s", obj.Text())
+	// for _, obj := range Objects {
+	// 	fmt.Printf("%s", obj.Text())
+	// }
+
+	fmt.Println("数据：")
+	fmt.Println(len(data.Objs))
+	objs := data.Objs
+	for _, obj := range objs {
+		fmt.Println(obj.Text())
 	}
-	
+	data.ExportModel("model")
+
 }
 
 //在每个文件夹下 go mod init 包名
