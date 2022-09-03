@@ -1,3 +1,11 @@
+/*
+ * @Descripttion: 
+ * @version: 
+ * @Author: 招人烦
+ * @Date: 2022-09-02 19:40:11
+ * @LastEditors: 招人烦
+ * @LastEditTime: 2022-09-03 17:50:55
+ */
 package airpak
 
 import (
@@ -48,7 +56,7 @@ func (d *Data) ExportModel(path string) error {
 		fmt.Println("写入错误：", err)
 		return err
 	}
-	fmt.Println("写入成功：n=", n)
+	fmt.Println("写入成功：字符数n=", n)
 
 	for _, obj := range d.Objs {
 		n, err := io.WriteString(file, obj.Text()+"\n")
@@ -56,7 +64,7 @@ func (d *Data) ExportModel(path string) error {
 			fmt.Println("写入错误：", err)
 			return err
 		}
-		fmt.Println("写入成功：n=", n)
+		fmt.Println("写入成功：字符数n=", n)
 	}
 
 	//读取文件

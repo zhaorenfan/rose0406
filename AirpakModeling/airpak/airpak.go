@@ -4,7 +4,7 @@
  * @Author: 招人烦
  * @Date: 2022-09-01 17:56:51
  * @LastEditors: 招人烦
- * @LastEditTime: 2022-09-01 22:51:41
+ * @LastEditTime: 2022-09-03 17:51:05
  */
 package airpak
 
@@ -189,14 +189,26 @@ func (w Wall) Text() string {
 
 type Opening struct {
 	Name string
+	Point1 Point
+	Point2 Point
 }
 
 func (o Opening) Text() string {
+
+	sub := PointSub(o.Point2, o.Point1)
+	diff := Vector3d2Str(sub)
+
+	plane := WhichPlane(o.Point1, o.Point2)
+	if plane == -1 {
+		msg := "object name:" + o.Name + " " + "点坐标错误导致未发现在yz/xz/xy平面任意一个"
+		panic(msg)
+	}
+
 	return "object opening " + o.Name + "\n" +
 		"    xvecf 0\n" +
 		"    current_stype quad\n" +
 		"    shape body_shape shape_quad\n" +
-		"        setval point1 {-1 0 0} point2 {0 2 0} diff {1 2 0} volume_flag {0} split_flag {16} plate_flag {0} diff_flag {0} plane {2} iradius {0} thickness {0} \n" +
+		"        setval point1 {"+ Point2Str(o.Point1) +"} point2 {"+ Point2Str(o.Point2)+"} diff {"+ diff +"} volume_flag {0} split_flag {16} plate_flag {0} diff_flag {0} plane {"+ strconv.Itoa(plane) +"} iradius {0} thickness {0} \n" +
 		"    end shape\n" +
 		"    zvecf 1\n" +
 		"    free_magnitude 1.0\n" +
@@ -205,3 +217,43 @@ func (o Opening) Text() string {
 		"    yvecf 0\n" +
 		"end object\n"
 }
+
+//棱柱
+type Prism struct {
+	Name string
+	BlockType int //枚举
+	Point1 Point
+	Point2 Point
+	Point3 Point
+	Height float32
+}
+
+func (p Prism) Text() string {
+
+	plane := WhichPlane(p.Point1, p.Point2)
+	if plane == -1 {
+		msg := "object name:" + p.Name + " " + "点坐标错误导致未发现在yz/xz/xy平面任意一个"
+		panic(msg)
+	}
+	blockType := ""
+	switch p.BlockType {
+	case FLUID:
+		blockType = "fluid"
+	case SOLID:
+		blockType = "solid"
+	default:
+		blockType = "fluid"
+	}
+	return  "object block "+p.Name+"\n" +
+			"	current_stype polygon\n"+
+			"	block_type "+blockType+"\n"+
+			"	shape body_shape shape_polygon\n"+
+			"		setval nverts 3\n"+
+			"		setval volume_flag {1} split_flag {0} changes {0} nverts {3} plane {"+strconv.Itoa(plane)+"} height {"+strconv.Itoa(int(p.Height))+"}  vert1 {"+ Point2Str(p.Point1)+"} vert2 {"+ Point2Str(p.Point2)+"} vert3 {"+ Point2Str(p.Point3)+"}\n"+
+			"	end shape\n"+
+			"	creation_order 30\n"+
+			"	current_genus default\n"+
+			"end object\n"
+}
+
+
