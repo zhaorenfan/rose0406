@@ -3,50 +3,48 @@
  * @version:
  * @Author: 招人烦
  * @Date: 2022-08-29 17:52:44
- * @LastEditors: 招人烦
- * @LastEditTime: 2022-09-01 22:45:01
+ * @LastEditors: 周宏敞
+ * @LastEditTime: 2022-09-03 00:19:19
  */
 package main
 
 import (
 	"airpak"
 	"fmt"
+	"flag"
 )
 
+var(
+	file string
+	export string
+)
+
+func init(){
+	flag.StringVar(&file, "i", "", "输入文件，默认为空")
+	flag.StringVar(&export, "o", "", "输出文件，默认为空")
+}
+
 func main() {
-	fmt.Printf("Hello, world. 你好， 世界！\n")
-	file := "block.txt"
+	//需要先解析
+	flag.Parse()
+	if i:=flag.NFlag();i!=2{
+		panic("参数不等于2")
+	}
+
+	if len(file)==0{
+		panic("输入文件为空")
+	}
+	if len(export)==0{
+		panic("输出文件为空")
+	}
+
+	fmt.Printf("Airpak3.0.16建模程序！\n")
+	//file := "D:\\MYProjects\\Rhinos\\10-零碳\\block.txt"
+	//export := "D:\\MYProjects\\Airpaks\\08-zero\\zero\\model"
 	data := &airpak.Data{}
 	airpak.Parse(data, file)
+	
 
-	// domain := &airpak.Domain{
-	// 	Name: "room.1",
-	// }
-	// block := &airpak.Block{
-	// 	Name:      "block.1",
-	// 	BlockType: airpak.FLUID,
-	// 	Point1:    airpak.Point{X: -1., Y: 0., Z: 0.},
-	// 	Point2:    airpak.Point{X: 0., Y: 2., Z: 1.},
-	// }
-	// wall := &airpak.Wall{
-	// 	Name:   "wall.1",
-	// 	Point1: airpak.Point{X: -1., Y: 0., Z: 1.},
-	// 	Point2: airpak.Point{X: 0., Y: 2., Z: 1.},
-	// }
-	// open := &airpak.Opening{
-	// 	Name: "open.1",
-	// }
-
-	// //Airpak对象的切片
-	// Objects := []airpak.AirPaKObj{}
-	// Objects = append(Objects, domain)
-	// Objects = append(Objects, block)
-	// Objects = append(Objects, wall)
-	// Objects = append(Objects, open)
-
-	// for _, obj := range Objects {
-	// 	fmt.Printf("%s", obj.Text())
-	// }
 
 	fmt.Println("数据：")
 	fmt.Println(len(data.Objs))
@@ -54,7 +52,7 @@ func main() {
 	for _, obj := range objs {
 		fmt.Println(obj.Text())
 	}
-	data.ExportModel("model")
+	data.ExportModel(export)
 
 }
 
