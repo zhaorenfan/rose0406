@@ -4,7 +4,7 @@
  * @Author: 招人烦
  * @Date: 2022-09-01 17:56:51
  * @LastEditors: 招人烦
- * @LastEditTime: 2022-09-03 17:51:05
+ * @LastEditTime: 2022-09-04 17:31:27
  */
 package airpak
 
@@ -18,6 +18,13 @@ import (
 const (
 	FLUID = iota
 	SOLID
+)
+
+//WALL TYPE
+const (
+	RECT = iota
+	POLYGON
+	INCLINED
 )
 
 type Vector3d struct {
@@ -87,16 +94,26 @@ func WhichPlane(p1, p2 Point) int {
 	dx := float64(diff.X)
 	dy := float64(diff.Y)
 	dz := float64(diff.Z)
-
-	if math.Abs(dx) == 0 && math.Abs(dy) != 0 && math.Abs(dz) != 0 {
+	//与yz平面平行，法向量n=(1,0,0)
+	if math.Abs(dx*1+dy*0+dz*0)<=1e-3{
 		return 0
-	} else if math.Abs(dx) != 0 && math.Abs(dy) == 0 && math.Abs(dz) != 0 {
-		return 1
-	} else if math.Abs(dx) != 0 && math.Abs(dy) != 0 && math.Abs(dz) == 0 {
-		return 2
-	} else {
-		return -1
 	}
+	if math.Abs(dx*0+dy*1+dz*0)<=1e-3{
+		return 1
+	}
+	if math.Abs(dx*0+dy*0+dz*1)<=1e-3{
+		return 2
+	}
+	return -1
+	// if math.Abs(dx) <= 0.001 && math.Abs(dy) != 0 && math.Abs(dz) != 0 {
+	// 	return 0
+	// } else if math.Abs(dx) != 0 && math.Abs(dy) <= 0.001 && math.Abs(dz) != 0 {
+	// 	return 1
+	// } else if math.Abs(dx) != 0 && math.Abs(dy) != 0 && math.Abs(dz) <= 0.001 {
+	// 	return 2
+	// } else {
+	// 	return -1
+	// }
 
 }
 
@@ -158,33 +175,84 @@ func (b Block) Text() string {
 
 type Wall struct {
 	Name   string
+	WallType int
 	Point1 Point
 	Point2 Point
+
+	NVerts int   //ONLY  PLOYGON 当前只支持3或者4，当>4时处理成有限个三角形或四边形
+	Point3 Point //ONLY  PLOYGON
+	Point4 Point //ONLY POLYGON
+	
+	Axis int  //Only INCLINED
+	Angle float32 //Only INCLINED
 }
 
 func (w Wall) Text() string {
-	sub := PointSub(w.Point2, w.Point1)
-	diff := Vector3d2Str(sub)
+	switch w.WallType{
+	case RECT:
+		sub := PointSub(w.Point2, w.Point1)
+		diff := Vector3d2Str(sub)
 
-	plane := WhichPlane(w.Point1, w.Point2)
-	if plane == -1 {
-		msg := "object name:" + w.Name + " " + "点坐标错误导致未发现在yz/xz/xy平面任意一个"
-		panic(msg)
+		plane := WhichPlane(w.Point1, w.Point2)
+		if plane == -1 {
+			msg := "object name:" + w.Name + " " + "点坐标错误导致未发现在yz/xz/xy平面任意一个"
+			panic(msg)
+		}
+
+		return "object wall " + w.Name + "\n" +
+			"    shape body_shape shape_quad\n" +
+			"        setval point1 {" + Point2Str(w.Point1) + "} point2 {" + Point2Str(w.Point2) + "} diff {" + diff + "} volume_flag {1} split_flag {0} plate_flag {1} diff_flag {0} plane {" + strconv.Itoa(plane) + "} iradius {0} thickness {0} \n" +
+			"    end shape\n" +
+			"    thermal_type temp\n" +
+			"    grid_priority 4\n" +
+			"    forced_flow_dir 0\n" +
+			"    thermal_itemp 293.15\n" +
+			"    current_genus default\n" +
+			"    current_stype quad\n" +
+			"    thermal_rtype reftemp\n" +
+			"    creation_order 2\n" +
+			"end object\n"
+	case INCLINED:
+		sub := PointSub(w.Point2, w.Point1)
+		diff := Vector3d2Str(sub)
+
+		return 	"object wall "+w.Name+"\n"+
+				"	shape body_shape shape_incline\n"+
+				"		setval point1 {"+Point2Str(w.Point1)+"} point2 {" + Point2Str(w.Point2) + "} diff {" + diff + "} diff2 {1.745888773353123 0 1.234529641979502} volume_flag {1} split_flag {0} plate_flag {1} diff_flag {1} axis {"+ strconv.Itoa(w.Axis) +"} rotate_sign {1} rotate_angle {"+strconv.FormatFloat(float64(w.Angle),'f',3, 32)+"} thickness {0} \n"+
+				"	end shape\n"+
+				"	forced_flow_dir 1\n"+
+				"	current_genus default\n"+
+				"	current_stype incline\n"+
+				"	thermal_rtype reftemp\n"+
+				"	creation_order 23\n"+
+				"end object\n"
+	case POLYGON:
+		verts := ""
+		if w.NVerts==3{
+			verts = "vert1 {"+Point2Str(w.Point1)+"} vert2 {"+Point2Str(w.Point2)+"} vert3 {"+Point2Str(w.Point3)+"}"
+		}else if w.NVerts==4{
+			verts = "vert1 {"+Point2Str(w.Point1)+"} vert2 {"+Point2Str(w.Point2)+"} vert3 {"+Point2Str(w.Point3)+"} vert4 {" +Point2Str(w.Point4)+"}"
+		}else{
+			panic("POLYGON点数量只能是3或者4")
+		}
+		plane := WhichPlane(w.Point1, w.Point2)
+		if plane == -1 {
+			msg := "object name:" + w.Name + " " + "点坐标错误导致未发现在yz/xz/xy平面任意一个"
+			panic(msg)
+		}
+		return 	"object wall "+w.Name+"\n"+
+				"	shape body_shape shape_polygon\n"+
+				"		setval nverts "+strconv.Itoa(w.NVerts)+"\n"+
+				"		setval volume_flag {0} split_flag {0} changes {0} nverts {"+strconv.Itoa(w.NVerts)+"} plane {"+ strconv.Itoa(plane) +"} height {0} "+verts+"\n"+
+				"	end shape\n"+
+				"	forced_flow_dir 1\n"+
+				"	current_genus default\n"+
+				"	current_stype polygon\n"+
+				"	thermal_rtype reftemp\n"+
+				"	creation_order 23\n"+
+				"end object\n"
 	}
-
-	return "object wall " + w.Name + "\n" +
-		"    shape body_shape shape_quad\n" +
-		"        setval point1 {" + Point2Str(w.Point1) + "} point2 {" + Point2Str(w.Point2) + "} diff {" + diff + "} volume_flag {1} split_flag {0} plate_flag {1} diff_flag {0} plane {" + strconv.Itoa(plane) + "} iradius {0} thickness {0} \n" +
-		"    end shape\n" +
-		"    thermal_type temp\n" +
-		"    grid_priority 4\n" +
-		"    forced_flow_dir 0\n" +
-		"    thermal_itemp 293.15\n" +
-		"    current_genus default\n" +
-		"    current_stype quad\n" +
-		"    thermal_rtype reftemp\n" +
-		"    creation_order 2\n" +
-		"end object\n"
+	return "\n"
 }
 
 type Opening struct {
@@ -249,7 +317,7 @@ func (p Prism) Text() string {
 			"	block_type "+blockType+"\n"+
 			"	shape body_shape shape_polygon\n"+
 			"		setval nverts 3\n"+
-			"		setval volume_flag {1} split_flag {0} changes {0} nverts {3} plane {"+strconv.Itoa(plane)+"} height {"+strconv.Itoa(int(p.Height))+"}  vert1 {"+ Point2Str(p.Point1)+"} vert2 {"+ Point2Str(p.Point2)+"} vert3 {"+ Point2Str(p.Point3)+"}\n"+
+			"		setval volume_flag {1} split_flag {0} changes {0} nverts {3} plane {"+strconv.Itoa(plane)+"} height {"+strconv.FormatFloat(float64(p.Height), 'f', 3, 32)+"}  vert1 {"+ Point2Str(p.Point1)+"} vert2 {"+ Point2Str(p.Point2)+"} vert3 {"+ Point2Str(p.Point3)+"}\n"+
 			"	end shape\n"+
 			"	creation_order 30\n"+
 			"	current_genus default\n"+

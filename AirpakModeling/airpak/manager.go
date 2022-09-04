@@ -4,7 +4,7 @@
  * @Author: 招人烦
  * @Date: 2022-09-02 19:40:11
  * @LastEditors: 招人烦
- * @LastEditTime: 2022-09-03 17:49:25
+ * @LastEditTime: 2022-09-04 14:11:03
  */
 package airpak
 
@@ -68,16 +68,72 @@ func Parse(d *Data, path string) /*error*/ {
 			}
 			d.AddObject(block)
 		case "WALL":
-			if l := len(arr); l != 6 {
-				panic("WALL描述错误，请检查")
-			}
+			//WALL wall.1 INCLINED PSTART {31.75,-9.35,0} PEND {33.94,-11.54,2.65} AXIS 2 ANGLE 45.0
 			fmt.Println("发现一个WALL")
-			wall := &Wall{
-			 	Name:   arr[1],
-			 	Point1: Str2Point(arr[3]),
-			 	Point2: Str2Point(arr[5]),
+			// if l := len(arr); l != 6 {
+			// 	panic("WALL描述错误，请检查")
+			// }
+			switch arr[2]{
+			case "RECT":
+				wall := &Wall{
+					Name:   arr[1],
+					WallType: RECT,
+					Point1: Str2Point(arr[4]),
+					Point2: Str2Point(arr[6]),
+			   }
+			   d.AddObject(wall)
+			case "INCLINED":
+				axis,err:= strconv.Atoi(arr[8])
+				if err!=nil{
+					panic("INCLINED旋转轴转换失败")
+				}
+				angle,err := strconv.ParseFloat(arr[10],64)
+				if err!=nil{
+					panic("INCLINED倾角转换失败")
+				}
+				wall := &Wall{
+					Name:     arr[1],
+					WallType: INCLINED,
+					Point1:   Str2Point(arr[4]),
+					Point2:   Str2Point(arr[6]),
+					Axis:     axis,
+					Angle:    float32(angle),
+				}
+			   d.AddObject(wall)
+			case "POLYGON":
+				// WALL wall.1 POLYGON NVERTS 4 VERT1 {31,-9.,0} VERT2 {33.9,-11.54,0} VERT3 {33.9,-11.5,2.65} VERT4 {31.7,-9.3,2.65}
+				nverts,err:= strconv.Atoi(arr[4])
+				if err!=nil{
+					panic("POLYGON点数量转换失败")
+				}
+				switch nverts{
+				case 3:
+					wall := &Wall{
+						Name:     arr[1],
+						WallType: POLYGON,
+						Point1:   Str2Point(arr[6]),
+						Point2:   Str2Point(arr[8]),
+						Point3:   Str2Point(arr[10]),
+						NVerts:   nverts,
+						//Point4:   Str2Point(arr[12]),
+					}
+					d.AddObject(wall)
+				case 4:
+					wall := &Wall{
+						Name:     arr[1],
+						WallType: POLYGON,
+						Point1:   Str2Point(arr[6]),
+						Point2:   Str2Point(arr[8]),
+						Point3:   Str2Point(arr[10]),
+						NVerts:   nverts,
+						Point4:   Str2Point(arr[12]),
+					}
+					d.AddObject(wall)
+				}
+				
 			}
-			d.AddObject(wall)
+			
+			
 		case "OPENING":
 			if l := len(arr); l != 6 {
 				panic("OPENING描述错误，请检查")
@@ -102,6 +158,7 @@ func Parse(d *Data, path string) /*error*/ {
 				bktype = FLUID
 			}
 			h, err :=strconv.ParseFloat(arr[10], 64)
+			fmt.Println(h)
 			if err!=nil{
 				panic("PRISM高度错误，请检查")
 			}
