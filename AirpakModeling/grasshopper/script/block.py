@@ -10,7 +10,7 @@ __version__ = "2022.09.02"
 
 ghenv.Component.Name = "BLOCK"
 ghenv.Component.NickName = "blk"
-ghenv.Component.Message = "VER 0.0.1\nSEPT_2_2022"
+ghenv.Component.Message = "VER 0.0.1\nJULY_2_2022"
 ghenv.Component.Category = "ZRF"
 ghenv.Component.SubCategory = "0 | ZRF"
 
